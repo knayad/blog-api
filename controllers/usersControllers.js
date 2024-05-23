@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
 const User = require("../models/userModel");
+const UserJWT = require("../models/userModel");
 
 const registerUser = async (req, res) => {
   try {
@@ -23,10 +23,10 @@ const registerUser = async (req, res) => {
       email: user.email,
       verified: user.verified,
       admin: user.admin,
-      token: null,
+      token: await UserJWT(),
     });
   } catch (error) {
-    return res.status(500).json({ message: "Something went wrong." });
+    return res.status(500).json({ message: "Something went wrong. " + error });
   }
 };
 
