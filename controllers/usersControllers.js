@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const User = require("../models/userModel");
 
 const registerUser = async (req, res) => {
@@ -29,4 +30,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser };
+module.exports = {
+  registerUser,
+};
