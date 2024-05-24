@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
 const UserJWT = require("../models/userModel");
 
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
@@ -9,9 +9,7 @@ const registerUser = async (req, res) => {
     let user = await User.findOne({ email });
 
     if (user) {
-      return res
-        .status(400)
-        .json({ message: "User already exists with that email." });
+      throw new Error("User already exists with that email.");
     }
     // create a new user if email is not found.
     user = await User.create({ name, email, password });
@@ -26,7 +24,7 @@ const registerUser = async (req, res) => {
       token: await UserJWT(),
     });
   } catch (error) {
-    return res.status(500).json({ message: "Something went wrong. " + error });
+    next(error);
   }
 };
 
