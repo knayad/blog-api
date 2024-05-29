@@ -1,5 +1,5 @@
 const User = require("../models/userModel");
-const UserJWT = require("../models/userModel");
+const generateJWT = require("../models/userModel");
 
 const registerUser = async (req, res, next) => {
   try {
@@ -21,13 +21,28 @@ const registerUser = async (req, res, next) => {
       email: user.email,
       verified: user.verified,
       admin: user.admin,
-      token: await UserJWT(),
+      token: generateJWT,
     });
   } catch (error) {
     next(error);
   }
 };
 
+const loginUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error("Email or password did not match our system.");
+    }
+  } catch {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
+  loginUser,
 };

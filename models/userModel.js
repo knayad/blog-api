@@ -26,11 +26,14 @@ userSchema.pre("save", async function (next) {
   return next();
 });
 
-const UserJWT = (userSchema.methods.generateJWT = async function () {
+const generateJWT = async () => {};
+userSchema.methods.generateJWT = async () => {
   // "this" again references the new user document being created/ sent from the controller
-  return jsonwebtoken.sign({ id: this._id }, process.env.JWT, {
+  jsonwebtoken.sign({ id: this._id }, process.env.JWT, {
     expiresIn: "30d",
   });
-});
+};
 
-(module.exports = mongoose.model("User", userSchema)), UserJWT;
+module.exports = mongoose.model("User", userSchema);
+
+module.exports = generateJWT;
