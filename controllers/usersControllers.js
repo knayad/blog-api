@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
-const generateJWT = require("../models/userModel");
+const UserJWT = require("../models/userModel");
 
-const registerUser = async (req, res, next) => {
+const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -9,44 +9,27 @@ const registerUser = async (req, res, next) => {
     let user = await User.findOne({ email });
 
     if (user) {
-      throw new Error("User already exists with that email.");
+      return res
+        .status(400)
+        .json({ message: "User already exists with that email." });
     }
-
     // create a new user if email is not found.
-    if (!user) {
-      user = await User.create({ name, email, password });
+    user = await User.create({ name, email, password });
 
-      return res.status(201).json({
-        _id: user._id,
-        avatar: user.avatar,
-        name: user.name,
-        email: user.email,
-        verified: user.verified,
-        admin: user.admin,
-        token: generateJWT,
-      });
-    }
+    return res.status(201).json({
+      _id: user._id,
+      avatar: user.avatar,
+      name: user.name,
+      email: user.email,
+      verified: user.verified,
+      admin: user.admin,
+      token: await UserJWT(),
+    });
   } catch (error) {
-    // next(error);
-    return res.status(500).json({ message: "Something went wrong!" });
-  }
-};
-
-const loginUser = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      throw new Error("Email or password did not match our system.");
-    }
-  } catch {
-    next(error);
+    return res.status(500).json({ message: "Something went wrong. " + error });
   }
 };
 
 module.exports = {
   registerUser,
-  loginUser,
 };
