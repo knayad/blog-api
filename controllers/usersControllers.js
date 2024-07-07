@@ -1,5 +1,7 @@
+const jsonwebtoken = require("jsonwebtoken");
 const User = require("../models/userModel");
-const UserJWT = require("../models/userModel");
+
+// const UserJWT = require("../models/userModel");
 
 const registerUser = async (req, res) => {
   try {
@@ -23,7 +25,9 @@ const registerUser = async (req, res) => {
       email: user.email,
       verified: user.verified,
       admin: user.admin,
-      token: await UserJWT(),
+      token: jsonwebtoken.sign({ id: this._id }, process.env.JWT_KEY, {
+        expiresIn: "30d",
+      }),
     });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong. " + error });
