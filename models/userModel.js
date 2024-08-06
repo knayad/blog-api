@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const jsonwebtoken = require("jsonwebtoken");
 
 const Schema = mongoose.Schema;
 
@@ -8,7 +9,11 @@ const UserSchema = new Schema(
     avatar: { type: String, default: "" },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: {
+      type: String,
+      required: true,
+      minlength: [5, "Minimum password length is 5 characters."],
+    },
     verified: { type: Boolean, default: false },
     verificationCode: { type: String, required: false },
     admin: { type: Boolean, default: false },
@@ -25,4 +30,10 @@ UserSchema.pre("save", async function (next) {
   return next();
 });
 
-module.exports = mongoose.model("User", UserSchema);
+UserSchema.methods.generateJWT = async function () {
+  return await jsonwebtoken.sign();
+};
+
+const User = mongoose.model("User", UserSchema);
+
+module.exports = User;

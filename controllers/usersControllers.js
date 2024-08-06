@@ -3,9 +3,9 @@ const jsonwebtoken = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const registerUser = async (req, res, next) => {
-  try {
-    const { name, email, password } = req.body;
+  const { name, email, password } = req.body;
 
+  try {
     // check if user exists already
     let user = await User.findOne({ email });
 
@@ -42,7 +42,11 @@ const loginUser = async (req, res, next) => {
     }
 
     const comparePasswords = async function (enteredPassword) {
-      return await bcrypt.compare(enteredPassword, this.password);
+      if (await bcrypt.compare(enteredPassword, this.password)) {
+        return true;
+      } else {
+        return false;
+      }
     };
 
     if (comparePasswords(password)) {
