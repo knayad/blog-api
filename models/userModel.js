@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const jsonwebtoken = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
 const Schema = mongoose.Schema;
 
@@ -31,7 +31,21 @@ UserSchema.pre("save", async function (next) {
 });
 
 UserSchema.methods.generateJWT = async function () {
-  return await jsonwebtoken.sign();
+  return await jwt.sign({ id: this._id }, process.env.JWT_KEY, {
+    expiresIn: "30d",
+  });
+};
+
+UserSchema.static.login = async function (email, password) {
+  const user = await this.findOne({ email: email });
+  if (user) {
+    const auth = await bcrypt.compare(password, user.password);
+    if (auth) {
+      return user;
+    }
+    throw Error("Invalid password.");
+  }
+  throw Error("Invalid email.");
 };
 
 const User = mongoose.model("User", UserSchema);

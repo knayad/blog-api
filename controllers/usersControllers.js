@@ -1,6 +1,4 @@
 const User = require("../models/userModel");
-const jsonwebtoken = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 
 const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -22,9 +20,7 @@ const registerUser = async (req, res, next) => {
       email: user.email,
       verified: user.verified,
       admin: user.admin,
-      token: jsonwebtoken.sign({ id: this._id }, process.env.JWT_KEY, {
-        expiresIn: "30d",
-      }),
+      token: await User.generateJWT(),
     });
   } catch (error) {
     next(error);
@@ -32,38 +28,19 @@ const registerUser = async (req, res, next) => {
 };
 
 const loginUser = async (req, res, next) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      throw new Error("Invalid user credentials.");
-    }
-
-    const comparePasswords = async function (enteredPassword) {
-      if (await bcrypt.compare(enteredPassword, this.password)) {
-        return true;
-      } else {
-        return false;
-      }
-    };
-
-    if (comparePasswords(password)) {
-      return res.status(201).json({
-        _id: user._id,
-        avatar: user.avatar,
-        name: user.name,
-        email: user.email,
-        verified: user.verified,
-        admin: user.admin,
-        token: jsonwebtoken.sign({ id: this._id }, process.env.JWT_KEY, {
-          expiresIn: "30d",
-        }),
-      });
-    } else {
-      throw new Error("Invalid login credentials.");
-    }
+    const user = await User.login(email, password);
+    res.status(200).json({
+      _id: user._id,
+      avatar: user.avatar,
+      name: user.name,
+      email: user.email,
+      verified: user.verified,
+      admin: user.admin,
+      token: await User.generateJWT(),
+    });
   } catch (error) {
     next(error);
   }
